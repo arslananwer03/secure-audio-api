@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     
     // Average high-quality MP3 streams at about ~40KB per second.
     // 40 KB/s * 30 seconds = 1,200 KB (approximately 1.25 MB).
-    const maxBytes = 620000; 
+    const maxBytes = 958291; 
 
     audioStream.on('data', (chunk) => {
       bytesDownloaded += chunk.length;
