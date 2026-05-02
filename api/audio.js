@@ -7,8 +7,11 @@ export default async function handler(req, res) {
     return res.status(400).send('No URL provided.');
   }
 
-  // Security validation: Only allow Shopify CDN URLs to prevent unauthorized use
-  if (!url.startsWith('https://cdn.shopify.com/')) {
+  // 1. Check against both Shopify and your custom domains
+  const isShopify = url.startsWith('https://cdn.shopify.com/');
+  const isVoodooBoy = url.includes('voodooboy.com');
+
+  if (!isShopify && !isVoodooBoy) {
     return res.status(403).send('Unauthorized source.');
   }
 
@@ -17,7 +20,7 @@ export default async function handler(req, res) {
   res.setHeader('Content-Disposition', 'inline; filename="secure-preview.mp3"');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  // Stream the file directly from Shopify's CDN without exposing the path
+  // Stream the file directly to the client
   https.get(url, (audioStream) => {
     audioStream.pipe(res);
   }).on('error', (err) => {
