@@ -7,8 +7,11 @@ export default async function handler(req, res) {
     return res.status(400).send('No URL provided.');
   }
 
-  // Security validation
-  if (!url.startsWith('https://cdn.shopify.com/')) {
+  // 1. Security validation: Check against both Shopify and custom domains
+  const isShopify = url.startsWith('https://cdn.shopify.com/');
+  const isVoodooBoy = url.includes('voodooboy.com');
+
+  if (!isShopify && !isVoodooBoy) {
     return res.status(403).send('Unauthorized source.');
   }
 
@@ -19,14 +22,14 @@ export default async function handler(req, res) {
   https.get(url, (audioStream) => {
     let bytesDownloaded = 0;
     
-    // An average high-quality MP3 (320kbps) streams at about 40KB per second.
+    // Average high-quality MP3 streams at about ~40KB per second.
     // 40 KB/s * 30 seconds = 1,200 KB (approximately 1.25 MB).
-    const maxBytes = 1258291; // ~1.25 Megabytes
+    const maxBytes = 1258291; 
 
     audioStream.on('data', (chunk) => {
       bytesDownloaded += chunk.length;
       
-      // Once we reach the 30-second data threshold, we destroy the stream and end the response.
+      // Once we reach the 30-second threshold, destroy the stream and end the response.
       if (bytesDownloaded > maxBytes) {
         audioStream.destroy();
         res.end();
